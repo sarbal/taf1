@@ -1,1 +1,6 @@
 # Readme
+
+
+## Frequency of independence network: 
+https://www.dropbox.com/s/vlt88gjazx3c0qp/freq.75.net.Rdata?dl=0
+
