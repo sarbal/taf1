@@ -1,13 +1,15 @@
 # Readme
 
 ## Frequency of co-expression networks: 
-Generic: 
-https://www.dropbox.com/s/vlt88gjazx3c0qp/freq.75.net.Rdata?dl=0
+You will need to install OutDeCo and download the networks. Note, these are large (GBs)! As this is currently in development, there may be some changes in the future. 
+```
+install.packages("devtools")
+devtools::install_github("sarbal/OutDeCo") 
 
-Blood: 
-
-Brain: 
-
+download_network_hdf5(network_type="generic") 
+download_network_hdf5(network_type="blood") 
+download_network_hdf5(network_type="brain") 
+```
 
 ## GIANT networks
 Run scripts: get_GIANT_networks.sh to download ~143 tissue specific networks
