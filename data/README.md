@@ -22,5 +22,19 @@ Or, you can access the raw data from: GSE84891 (https://www.ncbi.nlm.nih.gov/geo
 Contains the gene names and IDs of the genes used in the original analysis (GENCODE v22).
 gene_annotations_v22.Rdata
 
-## Networks 
+## GTEX
+Data obtained from version 8 of GTEX. 
+These files were downloaded and parsed:  
+Phenotypes: 
+https://storage.googleapis.com/gtex_analysis_v8/annotations/GTEx_Analysis_v8_Annotations_SampleAttributesDD.xlsx
+https://storage.googleapis.com/gtex_analysis_v8/annotations/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDD.xlsx
+https://storage.googleapis.com/gtex_analysis_v8/annotations/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt
+https://storage.googleapis.com/gtex_analysis_v8/annotations/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt
+
+Expression data: 
+https://storage.googleapis.com/gtex_analysis_v8/rna_seq_data/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct.gz
+https://storage.googleapis.com/gtex_analysis_v8/rna_seq_data/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct.gz
+
+
+
 
