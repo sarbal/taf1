@@ -1,0 +1,158 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+ 
+
+```{r}
+
+
+load("outliers/figures/fig1.Rdata")
+
+# Panel B 
+heatmap.3(up.plot, Colv=F, col=rev(viridis(100)), Rowv=F, 
+          ColSideCol = leg1[,1], RowSideCol=rev(magma(6))[up.bar], main="Up", 
+          keysize=1, key.xlab="log2FC Rank", key.title="NULL")
+
+legend( "left", title="Recurrence", leg=leg2[,2], col=leg2[,1], lwd=3 , bty="n")
+legend( "bottomleft", title="Family", leg=leg1[,2], col=leg1[,1], pch=15, bty="n")
+
+
+heatmap.3(down.plot, Colv=F, col=rev(viridis(100)), Rowv=F, 
+          ColSideCol = leg1[,1], RowSideCol=rev(magma(6))[down.bar], main="Down", 
+          keysize=1, key.xlab="log2FC Rank", key.title="NULL")
+legend( "left", title="Recurrence", leg=leg2[,2], col=leg2[,1], lwd=3 , bty="n")
+legend( "bottomleft", title="Family", leg=leg1[,2], col=leg1[,1], pch=15, bty="n")
+
+
+# Panel C
+# load("outliers/figures/fig3.panelB.Rdata")
+ 
+heatmap.3(mat.comb, col= cols , Rowv=F, Colv=F,  
+          ColSideCol = leg1[,1],  
+          RowSideCol = leg1[,1], 
+          cellnote=sigtemp2, notecol="white", notecex=2 ,
+          keysize=1, key.xlab="Significance of \n overlap (-log10 P)", key.title="NULL")
+ 
+
+
+
+# Panel D
+# load("outliers/figures/fig3.panelB.Rdata")
+
+  
+load("outliers/figures/fig3.panelC.Rdata") 
+lapply( 1:6, function(i) recur.u[recur.u == i  ] )
+lapply( 1:6, function(i) recur.d[recur.d == i  ] )
+y.up = 
+y.down = 
+  
+textgenes.up   = cbind(recur.u[recur.u >= fdrs.up$Pt ], 
+                       y.up,
+                       attr$name[match( names(recur.u[recur.u >= fdrs.up$Pt ] )  , attr$entrezID)   ] ) 
+textgenes.down = cbind( recur.d[recur.d >= fdrs.down$Pt ], 
+                        y.down,
+                        attr$name[match( names(recur.d[recur.d >= fdrs.down$Pt ] )  , attr$entrezID)]) 
+
+ 
+hu = hist( recur.u[recur.u>0]+0.01 , col=cols.rec[2], main="Recurrence, up", xlab="Count",xlim=c(1,4))
+abline( v = fdrs.up$Pt)
+text(  textgenes.up[,1],  textgenes.up[,2], textgenes.up[,3] )
+
+hd = hist( recur.d[recur.d>0]+0.01 , col=cols.rec[3], main="Recurrence, down", xlab="Count",xlim=c(1,4))
+abline( v = fdrs.down$Pt)
+text(  textgenes.down[,1],  textgenes.down[,2], textgenes.down[,3] )
+
+
+
+
+
+
+
+# To reproduce analysis:
+load("outliers/taf1_pedigrees/summary.deg.Rdata")
+load("outliers/taf1_pedigrees/taf1.DE.Rdata")
+
+recur.d = rowSums(genes.down)
+recur.u = rowSums(genes.up)
+ 
+load("outliers/analysis/fdr_calcs.genes.up.Rdata")
+fdrs.up = fdrs
+load("outliers/analysis/fdr_calcs.genes.down.Rdata")
+fdrs.down= fdrs
+
+fcc = c(7:9,12,11,10)
+all = unique(array(sapply(fcc, function(i) head(order(genesets.fcranks[,i]), n=100 ))  ))
+freq = count(array(sapply(fcc, function(i) head(order(genesets.fcranks[,i]), n=100 ))  ))
+m = match( all, freq[,1])
+om = order(-freq[m,2])
+down.plot = genesets.fcranks[all,fcc][om,]/dim(genesets.fcranks)[1]
+down.bar = freq[m,2][om]
+
+freq = count(array(sapply(fcc, function(i) tail(order(genesets.fcranks[,i]), n=100 ))  ))
+all = unique(array(sapply(fcc, function(i) tail(order(genesets.fcranks[,i]), n=100 ))  ))
+m = match( all, freq[,1])
+om = order(-freq[m,2])
+up.plot = 1- (genesets.fcranks[all,fcc][om,]/dim(genesets.fcranks)[1])
+up.bar = freq[m,2][om]
+
+cols.rec  =c(magma(5)[2], "deeppink4", "darkcyan" )
+cols.fam = makeTransparent(c("red", "purple", "blue", "cyan", "green", "orange")) # remember 4 and 6 flipped
+ 
+leg2 = cbind(rev(magma(6)), 1:6)
+leg1 = cbind( cols.fam , 1:6)
+
+
+reorder = c(1:3,6,5,4)
+down100overlaps = sapply(reorder, function(i) sapply(reorder, function(j) length(intersect(which(genes.down[,i]>0), which(genes.down[,j]>0) )) ) )
+up100overlaps = sapply(reorder, function(i) sapply(reorder, function(j)  length(intersect(which(genes.up[,i]>0), which(genes.up[,j]>0) )) ) )
+
+up100overlaps.pvals = up100overlaps * 0
+down100overlaps.pvals = down100overlaps * 0
+
+for(i in 1:6){
+	for(j in 1:6){
+
+		q = up100overlaps[i,j] - 1
+		m = 100
+		n = dim(genesets.fcranks)[1] - m
+		k = 100
+		up100overlaps.pvals[i,j] = phyper(q, m, n , k, lower.tail = FALSE, log.p = FALSE)
+
+		q = down100overlaps[i,j] -1
+		m = 100
+		n = dim(genesets.fcranks)[1] - m
+		k = 100
+		down100overlaps.pvals[i,j] = phyper(q, m, n , k, lower.tail = FALSE, log.p = FALSE)
+	}
+}
+
+bot = row(down100overlaps.pvals) > col( down100overlaps.pvals )
+top  = row(down100overlaps.pvals) <  col( down100overlaps.pvals )
+mat.down = -log10(down100overlaps.pvals)
+mat.up = -log10(up100overlaps.pvals)
+mat.comb = mat.down * 0
+mat.comb[bot] =  -log10(p.adjust(down100overlaps.pvals[bot]))
+mat.comb[top] =  -log10(p.adjust(up100overlaps.pvals[top]))
+count.comb =  up100overlaps
+count.comb[bot] = down100overlaps[bot]
+diag(count.comb) = ""
+sigtemp = (mat.comb > -log10(0.05) ) * 1
+sigtemp[sigtemp==1] = "*"
+sigtemp[sigtemp==0] = ""
+sigtemp2 = matrix(paste(count.comb, sigtemp), ncol=6 )
+ 
+
+
+
+save(mat.comb, sigtemp2, 
+     up.plot, down.plot, up.bar, down.bar, 
+     leg2, leg1, cols.rec, cols.fam, 
+     recur.u ,recur.d, fdrs.down, fdrs.up,file="fig1.Rdata")
+
+save(cols.rec, recur.u ,recur.d, fdrs.down, fdrs.up, file="fig1.panelD.Rdata")
+save(up.plot, down.plot, up.bar, down.bar, leg2, leg1, file="fig1.panelB.Rdata")
+save(mat.comb,sigtemp2,  file="fig1.panelC.Rdata")
+```
+ 
