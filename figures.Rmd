@@ -4,10 +4,8 @@ output: html_notebook
 ---
 
  
-
+#### Figure 1
 ```{r}
-
-
 load("outliers/figures/fig1.Rdata")
 
 # Panel B 
@@ -40,36 +38,37 @@ heatmap.3(mat.comb, col= cols , Rowv=F, Colv=F,
 
 # Panel D
 # load("outliers/figures/fig3.panelB.Rdata")
-
-  
-load("outliers/figures/fig3.panelC.Rdata") 
-lapply( 1:6, function(i) recur.u[recur.u == i  ] )
-lapply( 1:6, function(i) recur.d[recur.d == i  ] )
-y.up = 
-y.down = 
-  
-textgenes.up   = cbind(recur.u[recur.u >= fdrs.up$Pt ], 
-                       y.up,
-                       attr$name[match( names(recur.u[recur.u >= fdrs.up$Pt ] )  , attr$entrezID)   ] ) 
-textgenes.down = cbind( recur.d[recur.d >= fdrs.down$Pt ], 
-                        y.down,
-                        attr$name[match( names(recur.d[recur.d >= fdrs.down$Pt ] )  , attr$entrezID)]) 
+# load("outliers/figures/fig3.panelC.Rdata")  
+# load("outliers/figures/fig3.panelD.Rdata")
+ 
 
  
 hu = hist( recur.u[recur.u>0]+0.01 , col=cols.rec[2], main="Recurrence, up", xlab="Count",xlim=c(1,4))
-abline( v = fdrs.up$Pt)
-text(  textgenes.up[,1],  textgenes.up[,2], textgenes.up[,3] )
+abline( v = fdrs.up$Pt, lwd=4, col="grey")
+nmax= max(hu$counts)/2
+y.up = 1:length(recur.u[recur.u >= fdrs.up$Pt ]) * nmax/length(recur.u[recur.u >= fdrs.up$Pt ])  
+textgenes.up   = data.frame(recur.u[recur.u >= fdrs.up$Pt ] + 0.1, y.up,
+  as.character(attr$name[match( names(recur.u[recur.u >= fdrs.up$Pt ] )  , attr$entrezID)   ] )  ) 
+text(  textgenes.up[,1],  textgenes.up[,2], textgenes.up[,3], font=3 )
+
+
+
 
 hd = hist( recur.d[recur.d>0]+0.01 , col=cols.rec[3], main="Recurrence, down", xlab="Count",xlim=c(1,4))
-abline( v = fdrs.down$Pt)
-text(  textgenes.down[,1],  textgenes.down[,2], textgenes.down[,3] )
+abline( v = fdrs.down$Pt, lwd=4, col="grey")
+
+nmax= max(hd$counts)/2
+y.down = 1:length(recur.d[recur.d >= fdrs.down$Pt ])  * nmax/length(recur.d[recur.d >= fdrs.down$Pt ]) 
+textgenes.down = data.frame( recur.d[recur.d >= fdrs.down$Pt ] + 0.1,  y.down,
+  as.character(attr$name[match( names(recur.d[recur.d >= fdrs.down$Pt ] )  , attr$entrezID)])) 
+
+text(textgenes.down[,1],  textgenes.down[,2], textgenes.down[,3] , font=3, xpd=NA)
+```
 
 
 
 
-
-
-
+```{r}
 # To reproduce analysis:
 load("outliers/taf1_pedigrees/summary.deg.Rdata")
 load("outliers/taf1_pedigrees/taf1.DE.Rdata")
@@ -97,9 +96,6 @@ om = order(-freq[m,2])
 up.plot = 1- (genesets.fcranks[all,fcc][om,]/dim(genesets.fcranks)[1])
 up.bar = freq[m,2][om]
 
-cols.rec  =c(magma(5)[2], "deeppink4", "darkcyan" )
-cols.fam = makeTransparent(c("red", "purple", "blue", "cyan", "green", "orange")) # remember 4 and 6 flipped
- 
 leg2 = cbind(rev(magma(6)), 1:6)
 leg1 = cbind( cols.fam , 1:6)
 
@@ -151,8 +147,292 @@ save(mat.comb, sigtemp2,
      leg2, leg1, cols.rec, cols.fam, 
      recur.u ,recur.d, fdrs.down, fdrs.up,file="fig1.Rdata")
 
+
 save(cols.rec, recur.u ,recur.d, fdrs.down, fdrs.up, file="fig1.panelD.Rdata")
 save(up.plot, down.plot, up.bar, down.bar, leg2, leg1, file="fig1.panelB.Rdata")
 save(mat.comb,sigtemp2,  file="fig1.panelC.Rdata")
+
+save(p.tests.down, p.tests.up,n.sig.rec.down, n.sig.rec.up ,p.max ,xrange , plot_recurrence, file=" figS1.Rdata")
+
+
+
+
 ```
+
+
+#### Figure S?
+```{r}
+# Figure S? 
+plot_recurrence(xrange, n.sig.rec.up, p.tests.up, main="Up", xlab="Number of DE genes", ylab="Number of genes significantly recurrent")
+plot_recurrence(xrange, n.sig.rec.down, p.tests.down,main="Down", xlab="Number of DE genes", ylab="Number of genes significantly recurrent")
+
+```
+
+```{r}
+load("outliers/taf1_pedigrees/p.recur.pre.Rdata")
+xrange = 10:1000
+p.max = 0.05
+n.sig.rec.up = sapply(xrange-9, function(i)  sum(p.recur.up[[i]][p.recur.up[[i]][,2]  <= p.max,3]) )
+n.sig.rec.down = sapply(xrange-9, function(i)  sum(p.recur.down[[i]][p.recur.down[[i]][,2]  <= p.max,3]) )
+p.tests.up = sapply(xrange-9, function(i)   p.recur.up[[i]][p.recur.up[[i]][,2]  <= p.max,2][1] )
+p.tests.down = sapply(xrange-9, function(i) p.recur.down[[i]][p.recur.down[[i]][,2]  <= p.max,2][1])
+``` 
+
+
+
+
+#### Figure 2
+```{r}
+load("outliers/figures/fig4.panelA.Rdata")
+load("outliers/figures/fig4.panelB.Rdata")
+load("outliers/figures/fig4.panelC.Rdata")
+load("outliers/figures/fig4.panelD.Rdata")
+load("outliers/figures/fig4.panelE.Rdata")
+
+
+plot_enrich_res <- function(padj.res, col.size,  p=0.05  ){
+   f = rowSums( 1* (padj.res < p )) > 0
+   sigtemp = (padj.res < p) * 1
+   sigtemp[sigtemp==1] = "*"
+   sigtemp[sigtemp==0] = ""
+   recur.p = rowSums(padj.res < p)
+   recur.col = c(0,rev(magma(6)))[recur.p+1]
+   cols4b = colorpanel(5000, "lightgrey", "blue", "darkblue")
+   o = order(go.slim[ff,3][f] )
+   heatmap.3( -log10(padj.res[f,][o,]), Colv=F, Rowv=F, ColSideCol = cols.fam, RowSideColors = recur.col[f][o], col=cols9,cexRow = 0.7, cellnote=sigtemp[f,][o,], notecol="black", notecex=2 )
+   heatmap.3( -log10(padj.res[f,][o,]), Colv=F, Rowv=F, ColSideCol = cols.fam, RowSideColors = cols4b[col.size][f][o], col=cols9,cexRow = 0.7, cellnote=sigtemp[f,][o,], notecol="black", notecex=2 )
+}
+
+
+
+# Panel A 
+plot_enrich_res(padj.up, col.size)
+plot_enrich_res(padj.down, col.size)
+ 
+# Panel B 
+hist( recur.up.path[recur.up.path>0]+0.01 , col=cols.rec[2], main="Recurrence, up", xlab="Recurrence of GO group",xlim=c(1,4))
+abline( v = Pt.up, lwd=4, col="grey")
+
+# Panel C  
+pheatmap((gene.mat2[o,fo]), col=c(0,1), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
+ 
+# Panel D 
+hist( recur.down.path[recur.down.path>0]+0.01 , col=cols.rec[3], main="Recurrence, down", xlab="Recurrence of GO group",xlim=c(1,4))
+abline( v = Pt.down, lwd=2, col="lightgrey")
+
+# Panel E 
+pheatmap((gene.mat2[o1,][f1,fo]), col=c(0,1),  cluster_rows=F, cluster_cols=F, annotation_row=row_df[f1,], border=NA )
+ 
+
+
+
+```
+ 
+ 
+```{r}
+load("outliers/taf1_pedigrees/analysis/fdr_calcs.goslim.paths.all.Rdata")
+load("outliers/taf1_pedigrees/analysis/summary.goslim.paths.Rdata")
+load("outliers/taf1_pedigrees/analysis/summary.goslim.paths.recurs.Rdata")
+load("outliers/taf1_pedigrees/analysis/goslim.summary2genes.Rdata")
+load("outliers/taf1_pedigrees/analysis/goslim.enrich.all.Rdata")
+
+fcc = c(1:3,6,5,4)
+col.size = go.slim[ff,3]
+padj.up = apply(pvals.up[ff,fcc],2, p.adjust)
+rownames(padj.up) = go.slim[ff,1]
+padj.down = apply(pvals.down[ff,fcc],2, p.adjust)
+rownames(padj.down) = go.slim[ff,1]
+save(padj.down, padj.up,plot_enrich_res,col.size,ff,go.slim, cols4b, file="outliers/figures/fig4.panelA.Rdata")
+
+recur.up.path = recurs.paths[,2]
+Pt.up = pt.p.all[[2]]
+save(recur.up.path,  Pt.up , cols.rec, file="outliers/figures/fig4.panelB.Rdata")
+recur.down.path = recurs.paths[,3]
+Pt.down = pt.p.all[[3]]
+save(recur.down.path,  Pt.down , cols.rec, file="outliers/figures/fig4.panelD.Rdata")
+ 
+# Cleaning up results
+fo = c(1:3,6,5,4)
+load("temp2slim.Rdata")
+
+f11 = order(gene.mat2[,1] ,gene.mat2[,2], gene.mat2[,3], gene.mat2[,6], gene.mat2[,5], gene.mat2[,4] )
+gene.mat2 = gene.mat2[f11,]
+gene.mat = gene.mat[f11,]
+m = match(rownames(gene.mat), rownames(annot.sub) )
+o1 = order(annot.sub[m,1] )
+o2 = order(annot.sub[m,2] )
+o3 = order(annot.sub[m,3] )
+o = o1
+rec2 = rowSums(gene.mat2)
+row_df = data.frame( cbind(annot.sub[m,][o,] + 1 , rec2[o]))
+row_df[,1] = as.factor(row_df[,1])
+row_df[,2] = as.factor(row_df[,2])
+row_df[,3] = as.factor(row_df[,3])
+row_df[,4] = as.factor(row_df[,4])
+
+rownames(row_df) = rownames(gene.mat2[o,])
+pheatmap((gene.mat2[o,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df, border=NA )
+save( gene.mat2, o , fo, row_df, file="outliers/figures/fig4.panelC.Rdata")
+
+load("recur4slim.Rdata")
+m = match(rownames(gene.mat), rownames(annot.sub) )
+o1 = order(annot.sub[m,1] )
+o2 = order(annot.sub[m,2] )
+rec2 = rowSums(gene.mat2[o1,])
+f1 = rec2  >=3
+row_df = data.frame(cbind(annot.sub[m,][o1,]  + 1 , rec2  ))
+rownames(row_df) = rownames(gene.mat2[o1,])
+row_df = apply(row_df, 2, as.factor)
+row_df = as.data.frame(row_df)
+pheatmap((gene.mat2[o1,][f1,]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df[f1,], border=NA )
+fo = c(1,2,3,6,5,4)
+pheatmap((gene.mat2[o1,][f1,fo]), col=rev(magma(2)), cluster_rows=F, cluster_cols=F, annotation_row=row_df[f1,], border=NA )
+
+save(gene.mat2, o1, f1, fo, row_df , file="outliers/figures/fig4.panelE.Rdata")
+```
+
+
+#### Figure 3
+```{r}
+load("outliers/figures/fig5.panelA2.Rdata")
+load("outliers/figures/fig5.panelA.Rdata")
+ 
+load("outliers/taf1_pedigrees/analysis/summary.gene.recurs.int.Rdata")
+
+load("outliers/figures/fig5.panelC.Rdata")
+load("outliers/figures/fig5.panelB.Rdata")
+
+
+heatmap.2(n.coexp, col=viridis(100), density="none", trace="none", 
+          Rowv=consDend, Colv=consDend, 
+          RowSideColors=unmergedColors3,
+          ColSideColors=unmergedColors3, 
+          cexRow=0.5, cexCol=0.5, main="Downregulated genes",
+          keysize=1, key.xlab="Coexpression frequency", key.title="NULL")
+
+heatmap.3( cbind(go.figslim, go.msig), col=cols6, Rowv=consDend, Colv=F, 
+           RowSideColors=unmergedColors3, ColSideCol = cols4b[c(col.figslim, col.msig)], 
+           cexRow=0.5, cexCol=0.5, main="",
+           keysize=1, key.xlab="-log10 P-value", key.title="Enrichment")
+
+heatmap.3( cbind(go.figslim2, go.msig2), col=cols6, Rowv=consDend, Colv=F, 
+           RowSideColors=unmergedColors3, ColSideCol =cols4b[c(col.figslim, col.msig)], 
+           cexRow=0.5, cexCol=0.5, main="",
+           keysize=1, key.xlab="-log10 P-value", key.title="Enrichment")
+
+
+plot_2D_hist (up.mat10, Pt.pre.up, Pt.post.up, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+
+text(textgenes.up[,1],  textgenes.up[,1], textgenes.up[,3], font=3, xpd=NA)
+
+plot_2D_hist (down.mat10, Pt.pre.down, Pt.post.down, xlab="Recurrence pre-filtering", ylab="Recurrence post-filtering", col=cols11)
+
+
+plot_de_range(counts_sig.pre.up, counts_sig.post.up, cols.rec[2], ylim=c(0,15), xlim=c(10,200), 
+              xlab="Number of DE genes", ylab="Number of significant GO terms" )
+plot_de_range(counts_sig.pre.down, counts_sig.post.down, cols.rec[3], ylim=c(0,15), xlim=c(10,200),
+              xlab="Number of DE genes", ylab="Number of significant GO terms" )
+
+``` 
+
+
+
+```{r}
+# To reproduce analysis:
+load("outliers/taf1_pedigrees/1adj.tally_75.subnet.down1000.Rdata")
+n.coexp = subnet[1:100,1:100]
+medK = 0.28
+filtMin=6
+temp = n.coexp
+temp[temp >medK] = 1
+temp[temp <= medK] = 0
+consTree = hclust(as.dist(temp), method = "average");
+consDend = as.dendrogram(consTree)
+unmergedLabels3 = cutreeDynamic(dendro = consTree, distM = temp, deepSplit = 2, cutHeight = 0.995, minClusterSize = 2, pamRespectsDendro = FALSE );
+nsclust = as.numeric(unmergedLabels3)+1
+unmergedColors3 = magma( max(nsclust))[nsclust]
+n.coexp = 1-n.coexp
+save(n.coexp, consDend, unmergedColors3 , file="outliers/figures/fig5.panelA.Rdata")
+```
+
+
+#### Figure 4 
+```{r}
+
+
+``` 
+
+
+# Power calc figure (partial)
+```{r} 
+# Pre-filtering 
+load("deg.wilcox.adj.Rdata")
+deg = deg.wilcox.new
+genesets.fcranks.all = sapply(1:63, function(i) rank(deg[[i]][,2] ) )    
+xist =  which(  rownames(deg[[63]])  == "ENSG00000229807")
+cacna =  which(  rownames(deg[[63]])  == "ENSG00000100346")
+igfbp =   which(  rownames(deg[[63]])  == "ENSG00000146674")
+genes.ranks.pre = t(genesets.fcranks.all[filt,])
+
+# Combat adjusted results 
+load("deg.wilcox.combat.adj.Rdata") 
+deg = deg.wilcox.combat.adj
+genesets.fcranks.all = sapply(1:63, function(i) rank(deg[[i]][,2] ) )    
+xist =  which(  rownames(deg[[63]])  == "ENSG00000229807")
+cacna =  which(  rownames(deg[[63]])  == "ENSG00000100346")
+igfbp =   which(  rownames(deg[[63]])  == "ENSG00000146674")
+filt = c(xist, cacna,igfbp)
+genes.ranks.comb = t(genesets.fcranks.all[filt,])
+
+
+# DESeq2 batch aware
+load("deg.deseq.batch.Rdata")
+deg = deg.deseq.batch
+genesets.fcranks.all = sapply(7:63, function(i) rank(deg[[i]][,2] ) )    
+genesets.padj.all = sapply(7:63, function(i) rank( log10(deg[[i]][,6] ) )   )  
+genesets.both.all = sapply(7:63, function(i) rank(rank( log10(deg[[i]][,6] ) ) +  rank(deg[[i]][,2] ) )   )  
+
+xist =  which(  rownames(deg[[63]])  == "ENSG00000229807")
+cacna =  which(  rownames(deg[[63]])  == "ENSG00000100346")
+igfbp =   which(  rownames(deg[[63]])  == "ENSG00000146674")
+filt = c(xist, cacna,igfbp)
+genes.ranks.deseqBfc = t(genesets.fcranks.all[filt,])
+genes.ranks.deseqBp = t(genesets.padj.all[filt,])
+genes.ranks.deseqBboth = t(genesets.both.all[filt,])
+
+
+# DESeq2 filtered ?
+load("deg.deseq.filt.Rdata")
+deg = deg.deseq.filt
+genesets.fcranks.all = sapply(1:63, function(i) rank(deg[[i]][,2] ) )    
+genesets.padj.all = sapply(1:63, function(i) rank( log10(deg[[i]][,6] ) )   )  
+genesets.both.all = sapply(1:63, function(i) rank(rank( log10(deg[[i]][,6] ) ) +  rank(deg[[i]][,2] ) )   )  
+
+xist =  which(  rownames(deg[[63]])  == "ENSG00000229807")
+cacna =  which(  rownames(deg[[63]])  == "ENSG00000100346")
+igfbp =   which(  rownames(deg[[63]])  == "ENSG00000146674")
+filt = c(xist, cacna,igfbp)
+genes.ranks.deseqfc = t(genesets.fcranks.all[filt,])
+genes.ranks.deseqp = t(genesets.padj.all[filt,])
+genes.ranks.deseqboth = t(genesets.both.all[filt,])
+
+
+# DESeq2 default 
+load("deg.deseq.Rdata")
+deg = deg.deseq 
+genesets.fcranks.all = sapply(1:63, function(i) rank(deg[[i]][,2] ) )    
+genesets.padj.all = sapply(1:63, function(i) rank( log10(deg[[i]][,6] ) )   )  
+genesets.both.all = sapply(1:63, function(i) rank(rank( log10(deg[[i]][,6] ) ) +  rank(deg[[i]][,2] ) )   )  
+
+xist =  which(  rownames(deg[[63]])  == "ENSG00000229807")
+cacna =  which(  rownames(deg[[63]])  == "ENSG00000100346")
+igfbp =   which(  rownames(deg[[63]])  == "ENSG00000146674")
+filt = c(xist, cacna,igfbp)
+genes.ranks.deseq1fc = t(genesets.fcranks.all[filt,])
+genes.ranks.deseq1p = t(genesets.padj.all[filt,])
+genes.ranks.deseq1both = t(genesets.both.all[filt,])
+
+```
+
+
  
