@@ -358,25 +358,101 @@ save(n.coexp, consDend, unmergedColors3 , file="outliers/figures/fig5.panelA.Rda
 
 #### Figure 4 
 ```{r}
+load("outliers/taf1_pedigrees/deg.wilcox.combat.all.Rdata")
+deg = deg.wilcox.combat.case.control
+xist =  which(  rownames(deg)  == "ENSG00000229807")
+cacna =  which(  rownames(deg)  == "ENSG00000100346")
+igfbp =   which(  rownames(deg)  == "ENSG00000146674")
+filt = c(xist, cacna,igfbp)
+
+plot( (deg[,2]), -log10(deg[,4]) , pch=19 , bty="n", xlab="log2 FC", ylab="-log10 adjusted P-value")
+abline(v=c(-1,1), lwd=2, col="purple")
+abline(v=c(-2,2), lwd=4)
+abline(h=-log10(0.05) , lwd=2, col="lightgrey")
+text( (deg[filt,2])+c(0.5, 0.5, -0.5), -log10(deg[filt,4]) + c(0,0.1,0.05), c("XIST","CACNA1I", "IGFBP3"), xpd=NA )
+
+
+
 
 
 ``` 
 
 
-# Power calc figure (partial)
 ```{r} 
-# Pre-filtering 
-load("deg.wilcox.adj.Rdata")
-deg = deg.wilcox.new
+load("../taf1/outputs/deg.wilcox.combat.Rdata") 
+load("../taf1/outputs/family.combinations.Rdata") 
+deg = deg.wilcox.combat[[63]]
+xist =  which(  rownames(deg)  == "ENSG00000229807")
+cacna =  which(  rownames(deg)  == "ENSG00000100346")
+igfbp =   which(  rownames(deg)  == "ENSG00000146674")
+filt = c(xist, cacna,igfbp)
+
+
+plot( (deg[,2]), -log10(deg[,4]) , pch=19 , bty="n", xlab="log2 FC", ylab="-log10 adjusted P-value")
+abline(v=c(-1,1), lwd=2, col="purple")
+abline(v=c(-2,2), lwd=4)
+abline(h=-log10(0.05) , lwd=2, col="lightgrey")
+text( (deg[filt,2])+c(0.5, 0.5, -0.5), -log10(deg[filt,4]) + c(0,0.1,0.05), c("XIST","CACNA1I", "IGFBP3"), xpd=NA )
+
+deg = deg.wilcox.combat
 genesets.fcranks.all = sapply(1:63, function(i) rank(deg[[i]][,2] ) )    
 xist =  which(  rownames(deg[[63]])  == "ENSG00000229807")
 cacna =  which(  rownames(deg[[63]])  == "ENSG00000100346")
 igfbp =   which(  rownames(deg[[63]])  == "ENSG00000146674")
+filt = c(xist, cacna,igfbp)
+genes.ranks.comb = t(genesets.fcranks.all[filt,])
+
+ns = sapply(1:63, function(i) length(mat.list[[i]]) ) 
+plot(ns, genes.ranks.comb[,2] )
+
+``` 
+
+
+# Robustness plots 
+
+# Figure S3 
+# Panel C 
+```{r}
+recur.signi.up = calc_binom_recur_sig()
+recur.signi.down = calc_binom_recur_sig()
+
+par(mfrow=c(1,2))
+
+plot( recur.signi.up[,1], -log10(recur.signi.up[,3]) , xlab="Number of DE genes", 
+      bty="n", ylab="", type="l", col="grey", axes=F , lwd=2, main="Upregulated")
+axis(4, col="grey")
+mtext("Significance of recurrence (-log10 adjusted P-value)",4)
+par(new=T)
+plot( recur.signi.up[,1], recur.signi.up[,4] , type="l", xlab="", ylab="Recurrent", bty="n", lwd=2) 
+
+
+
+
+plot( recur.signi.down[,1], -log10(recur.signi.down[,3]) , xlab="Number of DE genes",  
+      bty="n", ylab="", type="l", col="grey", axes=F , lwd=2, main="Downregulated")
+axis(4, col="grey")
+mtext("Significance of recurrence (-log10 adjusted P-value)",4)
+par(new=T)
+plot( recur.signi.down[,1], recur.signi.down[,4] , type="l", xlab="", ylab="Recurrent", bty="n", lwd=2) 
+
+
+```
+
+# Power calc figure (partial)
+```{r} 
+# Pre-filtering 
+load("deg.wilcox.adj.Rdata")
+deg = deg.wilcox.adjusted
+genesets.fcranks.all = sapply(1:63, function(i) rank(deg[[i]][,2] ) )    
+xist =  which(  rownames(deg[[63]])  == "ENSG00000229807")
+cacna =  which(  rownames(deg[[63]])  == "ENSG00000100346")
+igfbp =   which(  rownames(deg[[63]])  == "ENSG00000146674")
+filt = c(xist, cacna,igfbp)
 genes.ranks.pre = t(genesets.fcranks.all[filt,])
 
 # Combat adjusted results 
-load("deg.wilcox.combat.adj.Rdata") 
-deg = deg.wilcox.combat.adj
+load("outliers/deg.wilcox.combat.all.Rdata") 
+deg = deg.wilcox.combat.case.control
 genesets.fcranks.all = sapply(1:63, function(i) rank(deg[[i]][,2] ) )    
 xist =  which(  rownames(deg[[63]])  == "ENSG00000229807")
 cacna =  which(  rownames(deg[[63]])  == "ENSG00000100346")
